@@ -31,42 +31,41 @@
 </div>
 
 
-<!-- Sección con las tarjetas -->
 <div class="section-container">
     @foreach($departments as $department => $cards)
         <div class="section-container" id="{{ strtolower(str_replace(' ', '', $department)) }}">
             <div class="section-title">{{ $department }}</div>
             <div class="content visible-cards">
                 @foreach(array_slice($cards, 0, 8) as $card)
-                <a href="{{ route('minerva-la') }}" class="card"> <!-- Enlace correcto para la ruta 'minerva-la' -->
-                    <div class="card-body">
-                        <img src="{{ explode(',', $card['foto'])[0] }}" alt="{{ $card['nombre'] }}" style="width: 100%; height: auto;">
-                        <h3>{{ $card['nombre'] }}</h3>
-                        <p>{{ $card['descripcion'] }}</p>
-                        <p>Coordenadas: {{ $card['coordenadas'] }}</p>
-                    </div>
-                </a>
-
-                @endforeach
-            </div>
-            
-            @if(count($cards) > 8)
-                <div class="content hidden-cards" id="more-{{ strtolower(str_replace(' ', '', $department)) }}" style="display: none;">
-                    @foreach(array_slice($cards, 8) as $card)
-                        <a href="{{ route('minerva-la') }}" class="card">
+                    @if(isset($card['id']) && isset($card['nombre']))
+                        <!-- Comprobar si es un aula o una referencia -->
+                        @if(isset($card['fotos']))
+                            <!-- Es un aula, usar la ruta para aulas -->
+                            <a href="{{ route('minerva-la.aula', ['id' => $card['id']]) }}" class="card">
+                        @elseif(isset($card['foto']))
+                            <!-- Es una referencia, usar la ruta para referencias -->
+                            <a href="{{ route('minerva-la.referencia', ['id' => $card['id']]) }}" class="card">
+                        @endif
                             <div class="card-body">
-                                <img src="{{ explode(',', $card['foto'])[0] }}" alt="{{ $card['nombre'] }}" style="width: 100%; height: auto;">
+                                <!-- Mostrar las imágenes adecuadamente -->
+                                @if(isset($card['fotos']))
+                                    @php
+                                        $fotos = explode(',', $card['fotos']);
+                                    @endphp
+                                    <img src="{{ $fotos[0] }}" alt="{{ $card['nombre'] }}" style="width: 100%; height: auto;">
+                                @elseif(isset($card['foto']))
+                                    <img src="{{ explode(',', $card['foto'])[0] }}" alt="{{ $card['nombre'] }}" style="width: 100%; height: auto;">
+                                @else
+                                    <img src="default-image.jpg" alt="{{ $card['nombre'] }}" style="width: 100%; height: auto;">
+                                @endif
                                 <h3>{{ $card['nombre'] }}</h3>
-                                <p>{{ $card['descripcion'] }}</p>
-                                <p>Coordenadas: {{ $card['coordenadas'] }}</p>
+                                <p>{{ $card['descripcion'] ?? 'No description available' }}</p>
+                                <p>Coordenadas: {{ $card['coordenadas'] ?? 'No coordinates' }}</p>
                             </div>
                         </a>
-                    @endforeach
-                </div>
-                <div class="view-more-btn">
-                    <button class="btn" onclick="showMoreCards('more-{{ strtolower(str_replace(' ', '', $department)) }}')">Ver más...</button>
-                </div>
-            @endif
+                    @endif
+                @endforeach
+            </div>
         </div>
     @endforeach
 </div>
